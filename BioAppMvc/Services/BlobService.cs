@@ -18,6 +18,7 @@ namespace BioAppMvc.Services
             var containerName = configuration["AzureStorage:ContainerName"];
 
             _containerClient = new BlobContainerClient(connectionString, containerName);
+            
             _containerClient.CreateIfNotExists(PublicAccessType.Blob);  // Ensures the container is created if it doesn't exist
         }
 
@@ -46,6 +47,8 @@ namespace BioAppMvc.Services
             return await blobClient.DeleteIfExistsAsync();
         }
 
+
+
         public async Task<List<string>> ListFilesAsync()
         {
             var fileList = new List<string>();
@@ -57,6 +60,11 @@ namespace BioAppMvc.Services
             }
 
             return fileList;
+        }
+        public string GetBlobUrl(string containerName, string fileName)
+        {
+            var blobClient = _blobServiceClient.GetBlobContainerClient(containerName).GetBlobClient(fileName);
+            return blobClient.Uri.ToString();
         }
     }
 }

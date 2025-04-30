@@ -1,8 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using BioAppMvc.Services; // Adjust this to where BlobService is
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.IO;
+using System.Threading.Tasks;
+using BioAppMvc.Services;
 
 namespace BioAppMvc.Controllers
 {
@@ -15,43 +16,26 @@ namespace BioAppMvc.Controllers
             _blobService = blobService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            var files = await _blobService.ListFilesAsync();
-            return View(files);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> UploadImage(IFormFile file)
         {
-            if (file != null && file.Length > 0)
+            if (file == null || file.Length == 0)
             {
-                using var stream = file.OpenReadStream();
-                var fileUrl = await _blobService.UploadFileAsync(stream, file.FileName, file.ContentType);
-
-                ViewBag.Message = "File uploaded successfully: " + fileUrl;
-            }
-            else
-            {
-                ViewBag.Message = "Please select a valid file.";
+                return BadRequest("No file uploaded.");
             }
 
-            var files = await _blobService.ListFilesAsync();
-            return View("Index", files);
-        }
+            var containerName = "images";
+            var fileName = file.FileName;
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(string fileName)
-        {
-            var result = await _blobService.DeleteFileAsync(fileName);
+            using (var stream = file.OpenReadStream())
+            {
+                await _blobService.UploadFileAsync(stream, containerName, fileName);
+            }
 
-            ViewBag.Message = result
-                ? $"File '{fileName}' deleted successfully."
-                : $"File '{fileName}' not found or already deleted.";
+            var imageUrl = _blobService.GetBlobUrl(containerName, fileName);
 
-            var files = await _blobService.ListFilesAsync();
-            return View("Index", files);
+            dynamic data = JsonConvert.DeserializeObject(imageUrl) ?? new object();
+            return Ok(new { url = imageUrl });
         }
     }
 }
