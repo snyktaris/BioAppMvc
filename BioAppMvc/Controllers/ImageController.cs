@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using BlobService.Services; // Adjust this to where BlobService is
+using BioAppMvc.Services; // Adjust this to where BlobService is
 using System.IO;
 
 namespace BioAppMvc.Controllers
@@ -28,7 +28,7 @@ namespace BioAppMvc.Controllers
             if (file != null && file.Length > 0)
             {
                 using var stream = file.OpenReadStream();
-                var fileUrl = await _blobService.UploadFileAsync(file.OpenReadStream(), file.FileName, file.ContentType);
+                var fileUrl = await _blobService.UploadFileAsync(stream, file.FileName, file.ContentType);
 
                 ViewBag.Message = "File uploaded successfully: " + fileUrl;
             }

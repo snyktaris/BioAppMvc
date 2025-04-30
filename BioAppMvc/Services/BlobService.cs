@@ -18,15 +18,18 @@ namespace BioAppMvc.Services
             var containerName = configuration["AzureStorage:ContainerName"];
 
             _containerClient = new BlobContainerClient(connectionString, containerName);
-            _containerClient.CreateIfNotExists(PublicAccessType.Blob);
+            _containerClient.CreateIfNotExists(PublicAccessType.Blob);  // Ensures the container is created if it doesn't exist
         }
 
         public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
         {
             var blobClient = _containerClient.GetBlobClient(fileName);
+            // Upload the file and overwrite if it exists
             await blobClient.UploadAsync(fileStream, overwrite: true);
+            // Set content type
             await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders { ContentType = contentType });
 
+            // Return the URL of the uploaded file
             return blobClient.Uri.ToString();
         }
 
