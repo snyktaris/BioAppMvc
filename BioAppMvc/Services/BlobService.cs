@@ -14,7 +14,7 @@ namespace BioAppMvc.Services
 
         public BlobService(IConfiguration configuration)
         {
-            var connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
+        var connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING") ?? configuration["AzureStorage:ConnectionString"];
             var containerName = configuration["AzureStorage:ContainerName"];
 
             _containerClient = new BlobContainerClient(connectionString, containerName);
@@ -61,10 +61,11 @@ namespace BioAppMvc.Services
 
             return fileList;
         }
-        public string GetBlobUrl(string containerName, string fileName)
-        {
-            var blobClient = _blobServiceClient.GetBlobContainerClient(containerName).GetBlobClient(fileName);
-            return blobClient.Uri.ToString();
+       public string GetBlobUrl(string fileName)
+        {   
+        var blobClient = _containerClient.GetBlobClient(fileName);
+        return blobClient.Uri.ToString();
         }
+
     }
 }

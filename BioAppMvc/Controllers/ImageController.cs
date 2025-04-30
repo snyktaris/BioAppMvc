@@ -32,7 +32,7 @@ namespace BioAppMvc.Controllers
                 await _blobService.UploadFileAsync(stream, containerName, fileName);
             }
 
-            var imageUrl = _blobService.GetBlobUrl(containerName, fileName);
+            var imageUrl = _blobService.GetBlobUrl(file.FileName);
 
             dynamic data = JsonConvert.DeserializeObject(imageUrl) ?? new object();
             return Ok(new { url = imageUrl });
