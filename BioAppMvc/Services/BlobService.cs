@@ -14,7 +14,7 @@ namespace BioAppMvc.Services
 
         public BlobService(IConfiguration configuration)
         {
-            var connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
+            var connectionString = Environment.GetEnvironmentVariable("DefaultEndpointsProtocol=https;AccountName=multisstorage;AccountKey=Jkume2ylRW9cUsKKvDVESnjrzIgMoMcQetu6xhEDYUc3vMDMGuIEzHaOmnzf3DVQOQEC32GnYt/6+AStvX5U2Q==;EndpointSuffix=core.windows.net");
             var containerName = configuration["AzureStorage:ContainerName"];
 
             _containerClient = new BlobContainerClient(connectionString, containerName);
