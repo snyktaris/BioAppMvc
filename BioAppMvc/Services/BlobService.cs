@@ -1,7 +1,6 @@
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
-using System.IO;
-using System.Threading.Tasks;
 
 public class BlobService
 {
@@ -9,23 +8,45 @@ public class BlobService
 
     public BlobService(IConfiguration configuration)
     {
-        var connectionString = configuration.GetValue<string>("AzureStorage:ConnectionString");
-        var containerName = configuration.GetValue<string>("AzureStorage:ContainerName");
+        var connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
+        var containerName = configuration["AzureStorage:ContainerName"];
 
-        var blobServiceClient = new BlobServiceClient(connectionString);
-        _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+        _containerClient = new BlobContainerClient(connectionString, containerName);
+        _containerClient.CreateIfNotExists(PublicAccessType.Blob);
     }
 
-    public async Task<string> UploadFileAsync(IFormFile file)
+    public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
     {
-        var blobClient = _containerClient.GetBlobClient(file.FileName);
-        using var stream = file.OpenReadStream();
-        await blobClient.UploadAsync(stream, overwrite: true);
-        return blobClient.Uri.ToString(); // returns the public URL for the uploaded file
+        var blobClient = _containerClient.GetBlobClient(fileName);
+        await blobClient.UploadAsync(fileStream, overwrite: true);
+        await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders { ContentType = contentType });
+
+        return blobClient.Uri.ToString();
     }
 
-    public string GetBlobUrl(string fileName)
+    public async Task<Stream> DownloadFileAsync(string fileName)
     {
-        return _containerClient.GetBlobClient(fileName).Uri.ToString();
+        var blobClient = _containerClient.GetBlobClient(fileName);
+        var downloadInfo = await blobClient.DownloadAsync();
+        return downloadInfo.Value.Content;
+    }
+
+    public async Task<bool> DeleteFileAsync(string fileName)
+    {
+        var blobClient = _containerClient.GetBlobClient(fileName);
+        return await blobClient.DeleteIfExistsAsync();
+    }
+
+    public async Task<List<string>> ListFilesAsync()
+    {
+        var fileList = new List<string>();
+
+        await foreach (BlobItem blobItem in _containerClient.GetBlobsAsync())
+        {
+            var blobClient = _containerClient.GetBlobClient(blobItem.Name);
+            fileList.Add(blobClient.Uri.ToString());
+        }
+
+        return fileList;
     }
 }
