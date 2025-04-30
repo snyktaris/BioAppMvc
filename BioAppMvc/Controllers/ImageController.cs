@@ -29,10 +29,10 @@ namespace BioAppMvc.Controllers
 
             using (var stream = file.OpenReadStream())
             {
-                await _blobService.UploadFileAsync(stream, containerName, fileName);
+            await _blobService.UploadFileAsync(file.OpenReadStream(), file.FileName, file.ContentType);
             }
 
-            var imageUrl = _blobService.GetBlobUrl(file.FileName);
+            var imageUrl =_blobService.GetBlobUrl(fileName);
 
             dynamic data = JsonConvert.DeserializeObject(imageUrl) ?? new object();
             return Ok(new { url = imageUrl });
