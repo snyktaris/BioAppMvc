@@ -1,17 +1,17 @@
-using Azure.Storage.Blobs;
-using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using BioAppMvc.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Register BlobService
 builder.Services.AddSingleton<BlobService>();
-services.AddSingleton<BlobService>();
 
-// Build the application
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -22,7 +22,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -30,5 +32,3 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
-
