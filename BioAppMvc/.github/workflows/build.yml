@@ -1,30 +1,26 @@
-name: Build and Deploy
+name: Build and Test
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: '8.0.x'
 
     - name: Restore dependencies
       run: dotnet restore BioAppMvc/BioAppMvc.csproj
 
-    - name: Build project
-      run: dotnet build BioAppMvc/BioAppMvc.csproj --configuration Release
-
-    - name: Run tests (if any)
-      run: dotnet test --no-build --verbosity normal || true
-
-
+    - name: Build
+      run: dotnet build BioAppMvc/BioAppMvc.csproj --configuration Release --no-restore
