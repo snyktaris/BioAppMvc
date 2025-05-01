@@ -14,23 +14,20 @@ namespace BioAppMvc.Services
 
         public BlobService(IConfiguration configuration)
         {
-        var connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING") ?? configuration["AzureStorage:ConnectionString"];
+            var connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING") 
+                                   ?? configuration["AzureStorage:ConnectionString"];
             var containerName = configuration["AzureStorage:ContainerName"];
 
             _containerClient = new BlobContainerClient(connectionString, containerName);
-            
-            _containerClient.CreateIfNotExists(PublicAccessType.Blob);  // Ensures the container is created if it doesn't exist
+            _containerClient.CreateIfNotExists(PublicAccessType.Blob);
         }
 
         public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
         {
             var blobClient = _containerClient.GetBlobClient(fileName);
-            // Upload the file and overwrite if it exists
             await blobClient.UploadAsync(fileStream, overwrite: true);
-            // Set content type
             await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders { ContentType = contentType });
 
-            // Return the URL of the uploaded file
             return blobClient.Uri.ToString();
         }
 
@@ -47,8 +44,6 @@ namespace BioAppMvc.Services
             return await blobClient.DeleteIfExistsAsync();
         }
 
-
-
         public async Task<List<string>> ListFilesAsync()
         {
             var fileList = new List<string>();
@@ -61,11 +56,11 @@ namespace BioAppMvc.Services
 
             return fileList;
         }
-       public string GetBlobUrl(string fileName)
-        {   
-        var blobClient = _containerClient.GetBlobClient(fileName);
-        return blobClient.Uri.ToString();
-        }
 
+        public string GetBlobUrl(string fileName)
+        {
+            var blobClient = _containerClient.GetBlobClient(fileName);
+            return blobClient.Uri.ToString();
+        }
     }
 }

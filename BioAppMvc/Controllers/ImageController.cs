@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.IO;
 using System.Threading.Tasks;
 using BioAppMvc.Services;
 
@@ -24,17 +22,16 @@ namespace BioAppMvc.Controllers
                 return BadRequest("No file uploaded.");
             }
 
-            var containerName = "images";
             var fileName = file.FileName;
+            var contentType = file.ContentType;
 
             using (var stream = file.OpenReadStream())
             {
-            await _blobService.UploadFileAsync(file.OpenReadStream(), file.FileName, file.ContentType);
+                await _blobService.UploadFileAsync(stream, fileName, contentType);
             }
 
-            var imageUrl =_blobService.GetBlobUrl(fileName);
+            var imageUrl = _blobService.GetBlobUrl(fileName);
 
-            dynamic data = JsonConvert.DeserializeObject(imageUrl) ?? new object();
             return Ok(new { url = imageUrl });
         }
     }
