@@ -22,10 +22,18 @@ namespace BioAppMvc.Services
 
         public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
         {
-            var blobClient = _containerClient.GetBlobClient(fileName);
-            await blobClient.UploadAsync(fileStream, overwrite: true);
-            await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders { ContentType = contentType });
-            return blobClient.Uri.ToString();
+            try
+            {
+                var blobClient = _containerClient.GetBlobClient(fileName);
+                await blobClient.UploadAsync(fileStream, overwrite: true);
+                await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders { ContentType = contentType });
+                return blobClient.Uri.ToString();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (optional, depending on your logging setup)
+                throw new ApplicationException("An error occurred while uploading the file to Blob storage.", ex);
+            }
         }
 
         public string GetBlobUrl(string fileName)

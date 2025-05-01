@@ -25,12 +25,17 @@ namespace BioAppMvc.Controllers
             var fileName = file.FileName;
             var contentType = file.ContentType;
 
+            // Upload the file to BlobStorage
             using (var stream = file.OpenReadStream())
             {
+                // Pass file stream, file name, and content type to BlobService for upload
                 await _blobService.UploadFileAsync(stream, fileName, contentType);
             }
 
+            // Get the URL of the uploaded image (the method is assumed to be in BlobService)
             var imageUrl = _blobService.GetBlobUrl(fileName);
+
+            // Return the URL as part of the response
             return Ok(new { url = imageUrl });
         }
     }
