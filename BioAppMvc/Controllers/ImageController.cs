@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using BioAppMvc.Services;
+using System.Threading.Tasks;
 
 namespace BioAppMvc.Controllers
 {
@@ -31,7 +31,6 @@ namespace BioAppMvc.Controllers
             }
 
             var imageUrl = _blobService.GetBlobUrl(fileName);
-
             return Ok(new { url = imageUrl });
         }
     }
